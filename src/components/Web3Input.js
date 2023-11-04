@@ -8,6 +8,7 @@ const GlassmorphismBox = () => {
   const [walletConnected, setWalletConnected] = useState(false);
   const [invalidAddress, setInvalidAddress] = useState(false);
   const [transactionPending, setTransactionPending] = useState(false);
+  const [showInputAndConfirm, setShowInputAndConfirm] = useState(false);
 
   useEffect(() => {
     checkMetaMask();
@@ -29,6 +30,7 @@ const GlassmorphismBox = () => {
   const checkTaskCompletion = async () => {
     // Simulate a task completion by setting taskCompleted to true.
     setTaskCompleted(true);
+    setShowInputAndConfirm(true); // Show input and "Confirm Transaction" button
   };
 
   const confirmTransaction = async () => {
@@ -190,7 +192,7 @@ const GlassmorphismBox = () => {
             ],
             "stateMutability": "view"
           }
-        ]); // Your contract ABI
+        ]); 
 
         const contract = new web3.eth.Contract(contractAbi, contractAddress);
 
@@ -199,7 +201,7 @@ const GlassmorphismBox = () => {
           from: window.ethereum.selectedAddress, // Use the connected user's address
         });
 
-        // Display a success message or update the UI accordingly
+          // Display a success message or update the UI accordingly
         console.log('Transaction confirmed:', result);
 
         // You can set transactionPending to false to hide the "Confirm Transaction" button
@@ -216,7 +218,7 @@ const GlassmorphismBox = () => {
     <div className="d-flex flex-column pt-5 align-items-center min-vh-100">
       <div className="glassmorphism-box p-4">
         <h1 className="text-white mb-4 text-center">Reward Pool</h1>
-        {walletConnected ? (
+        {showInputAndConfirm ? (
           <Form.Group controlId='address'>
             <Form.Control
               type='text'
@@ -227,9 +229,16 @@ const GlassmorphismBox = () => {
             />
           </Form.Group>
         ) : (
-          <p>Connect your MetaMask wallet to confirm the transaction.</p>
+          <Button
+            onClick={checkTaskCompletion}
+            className="btn btn-primary m-4"
+            disabled={!walletConnected}
+          >
+            Check Task Completion
+          </Button>
         )}
-        {taskCompleted ? (
+
+        {taskCompleted && (
           <div className="text-center">
             {walletConnected ? (
               transactionPending ? (
@@ -246,17 +255,6 @@ const GlassmorphismBox = () => {
               <p className="text-danger">Please input a valid address to confirm the transaction.</p>
             ) : null}
           </div>
-        ) : (
-          <Button
-            onClick={() => {
-              checkTaskCompletion();
-              // Additional logic to track habit creation and date marking
-            }}
-            className="btn btn-primary m-4"
-            disabled={!walletConnected}
-          >
-            Check Task Completion
-          </Button>
         )}
       </div>
     </div>
