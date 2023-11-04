@@ -1,4 +1,5 @@
 import { Nav, Container } from 'react-bootstrap'
+import ConnectWalletButton from './Connect'
 
 const Header = () => {
   const date = new Date()
@@ -7,6 +8,9 @@ const Header = () => {
       <Container className='d-flex justify-content-between align-items-center'>
         <h3 className='fw-bold'>Cloud Habits</h3>
         <span>{date.toDateString()}</span>
+        <div>
+          <ConnectWalletButton />
+        </div>
       </Container>
     </Nav>
   )
