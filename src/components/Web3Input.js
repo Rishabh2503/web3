@@ -4,11 +4,11 @@ import Web3 from 'web3';
 
 const GlassmorphismBox = () => {
   const [address, setAddress] = useState('');
-  const [taskCompleted, setTaskCompleted] = useState(false);
   const [walletConnected, setWalletConnected] = useState(false);
   const [invalidAddress, setInvalidAddress] = useState(false);
   const [transactionPending, setTransactionPending] = useState(false);
-  const [showInputAndConfirm, setShowInputAndConfirm] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     checkMetaMask();
@@ -27,20 +27,16 @@ const GlassmorphismBox = () => {
     }
   };
 
-  const checkTaskCompletion = async () => {
-    // Simulate a task completion by setting taskCompleted to true.
-    setTaskCompleted(true);
-    setShowInputAndConfirm(true); // Show input and "Confirm Transaction" button
-  };
-
   const confirmTransaction = async () => {
     if (walletConnected && Web3.utils.isAddress(address)) {
       try {
         const web3 = new Web3(window.ethereum);
 
-        // Your contract address and ABI
+        // Replace with your contract address
         const contractAddress = '0xd4C787b192c235DF1F3055a7D6c505E1F1578023';
-        const contractAbi = JSON.params([
+
+        // Replace with your contract ABI
+        const contractAbi = [
           {
             "type": "constructor",
             "name": "",
@@ -192,22 +188,28 @@ const GlassmorphismBox = () => {
             ],
             "stateMutability": "view"
           }
-        ]); 
+        ];
 
         const contract = new web3.eth.Contract(contractAbi, contractAddress);
 
         // Call your contract method to confirm the transaction
-        const result = await contract.methods.confirmTaskCompleted().send({
+        await contract.methods.confirmTaskCompleted().send({
           from: window.ethereum.selectedAddress, // Use the connected user's address
         });
 
-          // Display a success message or update the UI accordingly
-        console.log('Transaction confirmed:', result);
+        // Display a success message
+        setSuccessMessage('Transaction confirmed successfully');
 
-        // You can set transactionPending to false to hide the "Confirm Transaction" button
-        setTransactionPending(false);
+        // Clear the error message
+        setErrorMessage('');
       } catch (error) {
         console.error('Error confirming transaction:', error);
+
+        // Display an error message
+        setErrorMessage('Error confirming transaction: ' + error);
+
+        // Clear the success message
+        setSuccessMessage('');
       }
     } else {
       setInvalidAddress(true);
@@ -218,44 +220,36 @@ const GlassmorphismBox = () => {
     <div className="d-flex flex-column pt-5 align-items-center min-vh-100">
       <div className="glassmorphism-box p-4">
         <h1 className="text-white mb-4 text-center">Reward Pool</h1>
-        {showInputAndConfirm ? (
-          <Form.Group controlId='address'>
-            <Form.Control
-              type='text'
-              placeholder='Enter Address'
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="form-control mb-3"
-            />
-          </Form.Group>
-        ) : (
-          <Button
-            onClick={checkTaskCompletion}
-            className="btn btn-primary m-4"
-            disabled={!walletConnected}
-          >
-            Check Task Completion
-          </Button>
-        )}
+        <Form.Group controlId="address">
+          <Form.Control
+            type="text"
+            placeholder="Enter Address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            className="form-control mb-3"
+          />
+        </Form.Group>
 
-        {taskCompleted && (
-          <div className="text-center">
-            {walletConnected ? (
-              transactionPending ? (
-                <Button disabled className="btn btn-primary">
-                  Confirming Transaction...
-                </Button>
-              ) : (
-                <Button onClick={confirmTransaction} className="btn btn-primary">
-                  Confirm Transaction
-                </Button>
-              )
-            ) : null}
-            {invalidAddress ? (
-              <p className="text-danger">Please input a valid address to confirm the transaction.</p>
-            ) : null}
-          </div>
-        )}
+        <div className="text-center">
+          {walletConnected ? (
+            transactionPending ? (
+              <Button disabled className="btn btn-primary">
+                Confirming Transaction...
+              </Button>
+            ) : (
+              <Button onClick={confirmTransaction} className="btn btn-primary">
+                Confirm Transaction
+              </Button>
+            )
+          ) : null}
+          {invalidAddress ? (
+            <p className="text-danger">
+              Please input a valid address to confirm the transaction.
+            </p>
+          ) : null}
+          {successMessage && <p className="text-success">{successMessage}</p>}
+          {errorMessage && <p className="text-danger">{errorMessage}</p>}
+        </div>
       </div>
     </div>
   );
